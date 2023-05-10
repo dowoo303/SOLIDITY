@@ -22,3 +22,10 @@ REMIX DEFAULT WORKSPACE
 2. Mapping 응용
 3. For 루프
 4. fixed array
+
+
+05-10
+1. 저번시간 복습
+	1) mapping+array
+2. IF 기초 및 응용
+3. ENUM 기초 및 응용
