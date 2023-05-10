@@ -145,3 +145,98 @@ contract IF {
     }
 
 }
+
+contract IF2 {
+
+    // and or 실습
+    function setNumber(uint _n) public pure returns(string memory) {
+        if(_n >= 50 || _n<=10) {
+            return "A";
+        } else if(_n>=50 && _n%3==0) {
+            return "B";
+        } else {
+            return "C";
+        }
+
+        
+    }
+}
+
+
+contract ENUM {
+    enum Food { // enum 변수명 {변수1, 변수2, 변수3, 변수4}
+        Chicken,    // - 결과값: 0, 디폴트 값
+        Suish,      // - 결과값: 1
+        Bread,      // - 결과값: 2
+        Coconut     // - 결과값: 3
+    }
+
+    Food a;     // Food형 변수 선언
+    Food b;
+    Food c;
+
+    function setA() public {
+        a = Food.Chicken;
+    }
+
+    function setB() public {
+        b = Food.Suish;
+    }
+    
+    function setC() public {
+        c = Food.Bread;
+    }
+
+    // 번호로도 부여가 가능하다
+    function setC2(uint _n) public {
+        c = Food(_n);
+    }
+
+    function getABC() public view returns(Food, Food, Food) {
+        return(a,b,c);
+    }
+
+}
+
+// ENUM 응용
+contract ENUM2 {
+    enum Status {
+        neutral,
+        high,
+        low
+    }
+    Status st;
+
+    uint a=5;
+
+    function higher() public {
+        a++;
+        setA();
+    }
+
+    function lower() public {
+        a--;
+        setA();
+    }
+
+    function setA() public {
+        if(a >= 7) {
+            st = Status.high;
+        } else if(a<= 3) {
+            st = Status.low;
+        } else {
+            st = Status.neutral;
+        }
+    }
+
+
+    function getA() public view returns(uint) {
+        return a;
+    }
+
+    function getSt() public view returns(Status) {
+        return st;
+    }
+
+}
+
