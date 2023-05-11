@@ -29,3 +29,8 @@ REMIX DEFAULT WORKSPACE
 	1) mapping+array
 2. IF 기초 및 응용
 3. ENUM 기초 및 응용
+
+
+05-11
+1. 저번시간 복습
+2. TEST1
