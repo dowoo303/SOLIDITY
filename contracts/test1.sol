@@ -266,15 +266,15 @@ contract QUIZ1_answer {
     function FClass() public view returns(uint, Student[] memory) {
         uint num;   // F학점 학생수
 
-        // F_studetns를 지역변수가 아니라 밖에다 선언하면 이런 번거러운 과정을 피할 수는 있지만 가스비가 증가한다.
-        Student[] memory F_students = new Student[](num);  // num만큼의 크기 할당      
-
         for(uint i=0; i<students.length; i++) {
             if(keccak256(bytes(students[i].credit)) == keccak256(bytes("F"))) {
                 // F_students[num] = students[i];  // 사이즈를 정해주지않으면 push가 불가능 -> 근데 또 사이즈를 정해주면(fixed array) 당연히 push를 못함
                 num++;
             }
         } // num 구하는 for loop
+
+        // F_studetns를 지역변수가 아니라 밖에다 선언하면 이런 번거러운 과정을 피할 수는 있지만 가스비가 증가한다.
+        Student[] memory F_students = new Student[](num);  // num만큼의 크기 할당 
 
         uint _num;
         for(uint i=0; i<students.length; i++) {
@@ -283,10 +283,13 @@ contract QUIZ1_answer {
                 _num++;
             }
         }
+
+        return (_num, F_students);
     }
-    // 목표는 두번 갔다오는거 ok 근데 둘다 못하는 이유는 뭐냐 첫번째로 애시당초 선언을 했을 때 길이가 몇인지를 몰라서 동적으로 적어줌 
+    // 목표는 가스비를 최대한 줄이는 것. 
+    // F학점 학생수를 초반에 설정 못하는 이유는 첫번째로 애시당초 선언을 했을 때 길이가 몇인지를 몰라서 동적으로 적어줌 
     // 근데 길이를 동적으로 적었기때문에 동적인 길이가 정확히 몇인지 알기 전까지는 선언 불가능 
-    // 그래서 그 안에 넣고 빼고를 못해
+    // 그래서 그 안에 넣고 빼고를 못함
     // 그러면 우리가 할 수 있는건 두가지 방법인데
     // 1. 아무길이 설정하고 그 길이에 도달하면 길이를 늘려주는거
     // 2. 새로운애가 생길 때마다 하나씩 하나씩 늘려주는거 
@@ -294,17 +297,52 @@ contract QUIZ1_answer {
     // 그럼 기존에 있던 애들을 잠시 어디에 뒀다가 가져와야한다.
     // 그런 다음에 길이를 늘렸다가 저장해둔 아이를 새롭게 길이를 늘린 애한테 다시 봔환해주면 됨.
 
+    // -> 사실 그냥 상태변수 만들어서 사용하면 쉽다.
+    function FClass2() public view returns(/*Student[] memory*/ uint, uint, Student[] memory) {
+        Student[] memory F_Students = students;
+        Student[] memory F_Storage;
 
+        uint count;
+
+        for(uint i=0; i<students.length; i++) {
+            if(keccak256(bytes(students[i].credit)) == keccak256(bytes("F"))) {
+                count++;
+                F_Students[count-1] = students[i];
+                F_Storage = new Student[](count);
+                for(uint j=0; j<count; j++) {
+                    F_Storage[j] = F_Students[j];
+                }
+            }
+        }
+        return (F_Storage.length, count, F_Storage);
+    }
 
 
 
     // * S반 조회 기능 - 가장 점수가 높은 학생 4명을 S반으로 설정하는데, 이 학생들의 전체 정보를 반환하는 기능 (S반은 4명으로 한정)
+    function S_Class() public view returns(Student[4] memory) {
+        Student[] memory S_studnets = students;
+        Student[4] memory S_Class;
 
+        for(uint i=0;i<S_studnets.length-1; i++) {
+            for(uint j=i+1; j<S_studnets.length; j++) {
+                if(S_studnets[i].score < S_studnets[j].score) {
+                    (S_studnets[i], S_studnets[j]) = (S_studnets[j], S_studnets[i]);
+                }
+            }
+        }
 
+        for(uint i=0; i<4; i++) {
+            S_Class[i] = S_studnets[i];
+        }
+
+        return S_Class;
+    }
+
+    
 }
 
-
-
+// 문자열 비교법
 contract  String_Compare {
     // encodePacked
     function keccak1(string memory s1) public pure returns(bytes32) {
@@ -323,5 +361,45 @@ contract  String_Compare {
     // encodePacked 한 것도 자료형이 bytes임
     function compare2(string memory s1) public pure returns(bytes memory, bytes memory) {
         return (abi.encodePacked(s1), bytes(s1));
+    }
+}
+
+// 배열 정렬법
+contract Sorting {
+    /*
+    실습가이드
+    1. push() 사용하여 2,5,7,4,3,6 넣어보기
+    2. get() 사용하여 결과 확인 -> 2,5,7,4,3,6
+    3. sorting() 사용 후, get()으로 결과 확인 -> 7,6,5,4,3,2 
+    */
+
+    uint[] numbers;
+
+    function push(uint _n) public {
+        numbers.push(_n);
+    }
+
+    function sorting() public {
+        for(uint i=0;i<numbers.length-1; i++) {
+            for(uint j=i+1; j<numbers.length; j++) {
+                if(numbers[i] < numbers[j]) {
+                    (numbers[i], numbers[j]) = (numbers[j], numbers[i]);    // 한번에 두 자리 이상 배열 바꿔주는 방법
+                }
+            }
+        }
+    }
+
+    function sorting2() public {
+        for(uint j=1; j<numbers.length;j++) {
+            for(uint i=0; i<j; i++) {
+                if(numbers[i] < numbers[j]) {
+                    (numbers[i], numbers[j]) = (numbers[j], numbers[i]);
+                }
+            }
+        }
+    }
+
+    function get() public view returns(uint[] memory) {
+        return numbers;
     }
 }

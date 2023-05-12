@@ -164,7 +164,7 @@ contract IF2 {
 
 
 contract ENUM {
-    enum Food { // enum 변수명 {변수1, 변수2, 변수3, 변수4}
+    enum Food {     // enum 변수명 {변수1, 변수2, 변수3, 변수4}
         Chicken,    // - 결과값: 0, 디폴트 값
         Suish,      // - 결과값: 1
         Bread,      // - 결과값: 2
@@ -184,10 +184,10 @@ contract ENUM {
     }
     
     function setC() public {
-        c = Food.Bread;
+        c = Food.Coconut;
     }
 
-    // 번호로도 부여가 가능하다
+    // 위 가독성 좋은 Food. 선언 말고도 번호로도 부여가 가능하다
     function setC2(uint _n) public {
         c = Food(_n);
     }

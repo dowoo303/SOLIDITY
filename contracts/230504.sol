@@ -44,7 +44,7 @@ contract StringAndBytes {
     // _a의 첫번째 글자를 byte형태로 뽑아내기
     function bytesToString2(string memory _a) public pure returns(bytes1) {
         bytes memory _b = bytes(_a);    // _b에 _a의 bytes 형변환 정보 대입
-        return _b[0];   // _b는 bytes로 동적이지만 _b[0]는 정적이기 때문에 위 returns의 반환은 bytes memory가 아니라 bytes1여야 한다.
+        return _b[0];   // _b는 bytes로 동적이지만 _b[0]는 정적인 bytes1이 된다. 따라서 위 returns의 반환은 bytes memory가 아니라 bytes1여야 한다.
     }
 
     // _a의 첫번째 글자를 string형태로 뽑아내기
@@ -58,6 +58,16 @@ contract StringAndBytes {
     function bytesToString4(string memory _a, uint _n) public pure returns(string memory) {
         bytes memory _b = new bytes(1);
         _b[0] = bytes(_a)[_n-1];
+        return string(_b);
+    }
+
+    // _a의 글자를 모두 string형태로 뽑아내기
+    function bytesToString5(string memory _a) public pure returns(string memory) {
+        bytes memory l = bytes(_a);                // 먼저 문자열의 길이를 구한다.
+        bytes memory _b = new bytes(l.length);     // 문자열의 길이 만큼 bytes의 자리수를 할당해준다.
+        for(uint i=0; i<l.length; i++) {           // for문을 통해 자릿수만큼 실행.
+            _b[i] = bytes(_a)[i];
+        }
         return string(_b);
     }
 

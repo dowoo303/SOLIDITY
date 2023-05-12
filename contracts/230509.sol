@@ -180,7 +180,7 @@ contract fixedArray {
 
     
     uint[] a;
-    uint[4] b;  // array 길이제한
+    uint[4] b;  // fixed array: array 길이제한
 
     function getALength() public view returns(uint) {
         return a.length;
@@ -199,6 +199,7 @@ contract fixedArray {
     }
 
     // 길이가 정해진 array(fixed array)인 경우 push를 사용하여 값을 입력시킬 수 없다
+    // n+1번째에 _n값 입력
     function pushB(uint n, uint _n) public {
         b[n] = _n;
     }

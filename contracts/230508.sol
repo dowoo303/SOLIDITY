@@ -29,7 +29,7 @@ contract Address {
         a = _a;
     }
 
-    // 길이만 같을 뿐 형이 다르기 때문에 오류 발생
+    // bytes20으로 선언시 길이만 같을 뿐 형이 다르기 때문에 오류 발생
     // function setA2(bytes20 _a) public {
     //     a = _a;
     // }
@@ -63,7 +63,7 @@ contract Mapping {
         height[_name] = _h; // mapping이름[key 값] = value값
     }
 
-    // mapping에 정보 빼기(이름을 입력하면 키 불러오기)
+    // mapping에 정보 가져오기(이름을 입력하면 키 불러오기)
     function getHeight(string memory _name) public view returns(uint) {
         return height[_name];   // mapping이름[key값]
     }
