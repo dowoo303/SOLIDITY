@@ -23,7 +23,7 @@ contract morning {
     } 
 
 
-    receive() external payable{}    //  받는 사람이 컨트랙트면 실행되는 함수(돈을 받는 함수) - 함수의 이름이 붙어서옴(To앞에) -> 만약 없는 함수 호출이면 fallback으로
+    receive() external payable{}    // 받는 사람이 컨트랙트면 실행되는 함수(돈을 받는 함수) - 함수의 이름이 붙어서옴(결과값 To앞에) -> 만약 없는 함수 호출이면 fallback으로
 
     fallback() external payable{}   // 오류가 발생했을 때 부르는 함수(예외처리)
 
