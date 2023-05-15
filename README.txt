@@ -34,3 +34,18 @@ REMIX DEFAULT WORKSPACE
 05-11
 1. 저번시간 복습
 2. TEST1
+
+
+05-12
+1. Payable
+2. TEST1 답안풀이
+3. TEST2
+
+
+05-15
+1. TEST2 풀이
+    1) mapping 활용
+    2) require
+2. Constructor
+	1) MODIFIER
+3. TEST3
