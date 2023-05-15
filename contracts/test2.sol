@@ -54,33 +54,42 @@ contract TEST2_Answer {
         uint attempts;
     }
 
-    mapping(string => bytes32) ID_PW;   // db라고 생각하면 됨
-
-    // * 로그인 기능 - ID, PW를 넣으면 로그인 여부를 알려주는 기능
-    function logIn(string memory _ID, string memory _PW) public view returns(bool) {
-        // id와 비밀번호가 쌍으로 관리
-        return ID_PW[_ID] == keccak256(abi.encodePacked(_ID, _PW)); // 2개 이상 넣을 때는 bytes로는 힘들기 때문에 abi.encodePacked() 사용한다.
+    mapping(string => User) ID_PW;   // db라고 생각하면 됨
 
 
-        // * 비밀번호 5회 이상 오류시 경고 메세지 기능 - 비밀번호 시도 회수가 5회되면 경고 메세지 반환
-
+    // 정리를 위하여 간단한 함수 하나 생성(아이디와 비밀번호 hash 생성함수)
+    function getHash(string memory _ID, string memory _PW) public pure returns(bytes32) {
+        return keccak256(abi.encodePacked(_ID, _PW));
     }
 
-    function logIn2(string memory _ID) public view returns(bytes32){
-        return ID_PW[_ID];
+
+    // * 로그인 기능 - ID, PW를 넣으면 로그인 여부를 알려주는 기능
+    // id와 비밀번호가 쌍으로 관리
+    function logIn(string memory _ID, string memory _PW) public returns(bool) {
+        // * 비밀번호 5회 이상 오류시 경고 메세지 기능 - 비밀번호 시도 회수가 5회되면 경고 메세지 반환
+        require(ID_PW[_ID].attempts < 5, "Too much attempts");
+
+        if(ID_PW[_ID].hash == getHash(_ID, _PW)) {  // 2개 이상 넣을 때는 bytes로는 힘들기 때문에 abi.encodePacked() 사용한다.
+            ID_PW[_ID].attempts = 0;
+            return true;
+        } else {
+            ID_PW[_ID].attempts++;
+            return false;
+        }
     }
 
     // * 회원가입 기능 - 새롭게 회원가입할 수 있는 기능
     function signIn(string memory _ID, string memory _PW) public {
         // * 회원가입시 이미 존재한 아이디 체크 여부 기능 - 이미 있는 아이디라면 회원가입 중지
-        require(ID_PW[_ID] == 0x0000000000000000000000000000000000000000000000000000000000000000, "Provided ID is already being used.");
-        ID_PW[_ID] = keccak256(abi.encodePacked(_ID, _PW));
+        require(ID_PW[_ID].hash == 0x0000000000000000000000000000000000000000000000000000000000000000, "Provided ID is already being used.");
+        ID_PW[_ID].hash = getHash(_ID, _PW);    // 2개 이상 넣을 때는 bytes로는 힘들기 때문에 abi.encodePacked() 사용한다.
     }
 
     // * 회원탈퇴 기능 - 회원이 자신의 ID와 PW를 넣고 회원탈퇴 기능을 실행하면 관련 정보 삭제
     function signOut(string memory _ID, string memory _PW) public {
-        require(logIn(_ID, _PW) == true);
-        delete ID_PW[_ID];
+        // require(logIn(_ID, _PW) == true);
+        require(ID_PW[_ID].hash == getHash(_ID, _PW));
+        delete ID_PW[_ID].hash;
     }
 
 }
@@ -106,4 +115,69 @@ contract REQUIRE {
 }
 
 
+contract REQUIRE2 {
+    function getBool() public pure returns(bool) {
+        bool _a;
+        return _a;
+    }
+
+    function Require1() public pure returns(uint) {
+        uint _a=1;
+        bool b;     // 디폴트 false
+        require(b, "Error");    // 통과못함
+        return _a;
+    }
+
+    function Require2() public pure returns(uint) {
+        uint _a=1;
+        bool _b;     // 디폴트 false
+        return _a;
+        require(_b, "Error");    // Unreacheable code
+    }
+
+
+    // require의 동작 더 자세히 알아보기 -> require가 가장 밑에 있어도 위에 실행한 코드까지 모두 무효화 시켜버린다.(마치 함수를 실행한적 없는것 처럼)
+    uint a = 1;
+
+    function getA() public view returns(uint) {
+        return a;
+    }
+
+    function Require3() public {
+        bool c;
+        a = 5;
+        require(c, "error");    // 위에서 a를 5로 바꾼 것도 전부 다 revert(원래 상태로 복구) 시킨다.
+    }
+
+    // 밖에 있는 다른 함수를 실행시키면 require의 동작은? -> 이것도 모두 무효화
+    function setAasFive() public {
+        a = 5;
+    }
+
+    function Require4() public {
+        bool c;
+        setAasFive();
+        require(c, "error");
+    }
+
+
+    // require에 조건 여러개 넣기(and, or 다 가능)
+    function Require5(uint _n) public pure returns(bool) {
+        require(_n%5==0 && _n>10, "Nope");
+        return true;
+    }
+
+
+    // if문 안의 require
+    function Require6(uint _a) public pure returns(uint) {
+        if(_a%3==0) {
+            require(_a%3!=0, "nope");
+        } else if(_a%3 == 1) {
+            return _a%3;
+        } else {
+            return _a%3;
+        }
+    }
+
+}
 
