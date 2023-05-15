@@ -93,26 +93,22 @@ contract CONSTRUCTOR5 {
 
     // 트랜잭션: from은 내 주소고, to는 컨트랙트 주소
     // msg.sender: 거래를 일으키는 사람
+    // payable: 해당 스마트 컨트랙트에 돈을 보내고 싶음 = 컨트랙트는 돈을 받고 싶음
 
 
     address payable owner;
 
-    // 해당 컨트랙트에 돈을 보내고 싶음 = 컨트랙트는 돈을 받고 싶음 -> payable
     constructor() payable  {
-        payable(this).transfer(msg.value);      // 돈을받고싶음(이 컨트랙트주소로).돈을보낸다(value만큼)
+        // 아래 코드를 넣음으로써 Deploy와 동시에 스마트 컨트랙트에 돈을 넣을 수 있음(단, 밑에서 receive 함수는 미리 선언해둬야함)
+        payable(this).transfer(msg.value);      // 스마트 컨트랙트는 [돈을받고싶음(이 컨트랙트주소로).돈을보낸다(value만큼)]
         
-        // 이 컨트랙트를 배포한 사람이 오너다
+        // 생성자에서 오너를 선언하고 시작한다.
         owner = payable(msg.sender);    // 여기서 msg.sender는 컨트랙트 배포자를 말하며, owner에 이 컨트랙트 배포자를 넣어 고정값으로 만들어둔다.
     }
 
     // 받는 사람이 컨트랙트면 실행되는 함수 - 이게 있어야 위 코드가 작동함(컨트랙트가 돈을 받을 수 있음)
     receive() external payable{}    // 일반거래(별도의 호출되는 함수가 없는 거래)시 해당 contract가 돈을 받을 수 있게 해주는 함수
 
-
-
-    function getOwner() public view returns(address) {
-        return owner;
-    }
 
     // 특정 지갑주소에 특정 금액만큼 보내는 함수
     // 컨트랙트로부터 돈을 받는 함수
@@ -126,7 +122,6 @@ contract CONSTRUCTOR5 {
     function deposit() public payable returns(uint) {
         return msg.value;
     }
-
 
     // 컨트랙트가 owner에게 잔고 전부를 돈을 보내는 함수 - 오너 입장에서는 전액 인출
     function withdraw1() public {
@@ -145,6 +140,10 @@ contract CONSTRUCTOR5 {
     function withdraw3() public {
         require(msg.sender == owner, "only owner can transfer asset");
         owner.transfer(1 ether);      // 이 컨트랙트 잔고를 모두 오너에게 보내라.
+    }
+
+    function getOwner() public view returns(address) {
+        return owner;
     }
 
 }

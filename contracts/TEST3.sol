@@ -70,8 +70,8 @@ contract TEST3 {
     receive() external payable{}
     
     function fillFuel() public payable {
-        if(token > 0) {
-            token--;
+        if(tokens[msg.sender] > 0) {
+            tokens[msg.sender]--;
             Fuel=100;
         } else {
             require(msg.value == 1 ether);      // 지금 지갑에서 지불할 VALUE로 1을 설정하라고 요구
@@ -95,13 +95,16 @@ contract TEST3 {
 
     // * 지불을 미리 하고 주유시 차감하는 기능
     uint token;
+    mapping(address => uint) tokens;    // 각 지갑별로 토큰 관리
+
     function FastPay() public payable {
         payable(this).transfer(msg.value);  // 이 스마트 컨트랙트에 지금 버튼 누른 주인이 입력한 원하는 값(msg.value)을 입금
-        token += msg.value / 1 ether;       // 넣은 만큼 토큰으로 줌
+        token = msg.value / 1 ether;        // 넣은 만큼 토큰으로 줌
+        tokens[msg.sender] += token;        // 각 지갑별로 토큰 적립
     }
 
     function getToken() public view returns(uint) {
-        return token;
+        return tokens[msg.sender];
     }
 
 }
