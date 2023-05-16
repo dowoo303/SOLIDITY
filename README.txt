@@ -49,3 +49,24 @@ REMIX DEFAULT WORKSPACE
 2. Constructor
 	1) MODIFIER
 3. TEST3
+
+
+05-16
+1. 다른 컨트랙트에 있는 변수를 변경시키는 것이 목적
+	1) VISIBILITY
+    2) 인스턴스
+    3) Estate(상속)
+2. TEST4
+3. TEST3 풀이
+
+
+05-17
+
+
+05-18
+
+
+
+
+
+

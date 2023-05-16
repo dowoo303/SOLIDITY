@@ -200,7 +200,7 @@ contract B {
     A b;
 
     constructor(uint _a, uint _b) {
-        b = new A(_a, _b);
+        b = new A(_a, _b);      // new를 쓸 경우 A의 생성자 매개변수 다 입력해줘야함
     }
 }
 
@@ -208,6 +208,6 @@ contract B2 {
     A b;
 
     constructor(address _a) {
-        b = A(_a);
+        b = A(_a);      // 따라가는 함수는 주소를 매개변수로 받으면 됨
     }
 }

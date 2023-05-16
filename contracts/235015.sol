@@ -151,11 +151,16 @@ contract CONSTRUCTOR5 {
 
 // MODIFIER 기초
 contract MODIFIER {
-    uint a;
+    uint a = 1;
 
     modifier lessThanFive() {
         require(a<5, "should be less than five");
         _;  // 함수가 실행되는 시점
+        _;
+        _;
+        _;
+        _;
+        _;
     }
 
     function aPlus() public {
