@@ -111,6 +111,13 @@ contract CarDrive {
 }
 
 
+/* 내가 한 것과 정답 차이점
+car라는 구조체를 따로 선언해서 사용(차상태(enum), 연료, 게이지)
+동작에 따른 차 관리 상태 세세히 설정
+
+*/
+
+
 contract answer {
     enum carStatus {
         stop,
@@ -126,6 +133,12 @@ contract answer {
     }
 
     car myCar;
+    address payable public owner;
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+
 
     // * 악셀 기능 - 속도를 1 올리는 기능, 악셀 기능을 이용할 때마다 연료가 2씩 줄어듬, 연료가 30이하면 더 이상 악셀을 이용할 수 없음, 70이상이면 악셀 기능은 더이상 못씀
     function accel() public {
@@ -136,6 +149,7 @@ contract answer {
         myCar.speed++;
         myCar.fuelGauage -= 2;
     }
+
 
     // * 브레이크 기능 - 속도를 1 줄이는 기능, 속도가 0인 상태, 브레이크 기능을 이용할 때마다 연료가 1씩 줄어듬, 속도가 0이면 브레이크는 더이상 못씀
     function breakCar() public {
@@ -155,6 +169,10 @@ contract answer {
     // * 시동 끄기 기능 - 시동을 끄는 기능, 속도가 0이 아니면 시동은 꺼질 수 없음
     function turnOff() public {
         require(myCar.speed == 0 && myCar.status != carStatus.turnedOff);
+        if(myCar.speed !=0) {
+            myCar.speed=0;
+        }
+
         myCar.status = carStatus.turnedOff;
     }
 
@@ -167,14 +185,93 @@ contract answer {
 
 
     // * 주유 기능 - 주유하는 기능, 주유를 하면 1eth를 지불해야하고 연료는 100이 됨
-    function fillFuel() public {
-
+    function fillFuel() public payable {    // payable이 붙어 있어야 돈이 넣어짐
+        require(((prePaid >= 10**18 && msg.value==0) || msg.value == 10**18) && myCar.status == carStatus.turnedOff);
+        
+        // msg.value
+        if(msg.value != 10**18) {
+            prePaid -= 10**18;
+        }
+        myCar.fuelGauage = 100;
     }
+
+    // * 주유소 사장님은 2번 지갑의 소유자임, 주유소 사장님이 withdraw하는 기능
+    function withdraw() public {    // payable 필요없음
+        require(owner == msg.sender);
+        owner.transfer(address(this).balance);
+    }
+
+    // * 지불을 미리 하고 주유시 차감하는 기능
+    uint public prePaid;
+
+    function deposit() public payable {
+        prePaid += msg.value;
+    }
+
 
 }
 
-/* 내가 한 것과 정답 차이점
-car라는 구조체를 따로 선언해서 사용(차상태, 속도)
 
 
+
+
+
+
+
+
+
+
+// 조건 알아보기(&&와 || 동시 사용) -> 사실상 플로우가 ||로 끊어지고, &&는 묶이는 결과가 나타남
+contract A {
+
+    uint public a;
+    uint public b;
+    uint public c;
+
+    function setABC(uint _a, uint _b, uint _c) public {
+        (a,b,c) = (_a, _b, _c); 
+    }
+
+    function ABC() public returns(string memory) {
+        require(a ==0 && b != 1 || c ==0);
+        /*
+        a=0 b=2 c=2 <- 앞의 조건 2개 만족, 뒤의 조건 불만족 -> o
+        a=0 b=1 c=0 <- 앞의 조건 1개 만족, 뒤의 조건 만족 -> o
+        a=0 b=1 c=1 <- 앞의 조건 1개 만족, 뒤의 조건 불만족 -> x
+        a=1 b=1 c=0 <- 앞의 조건 0개 만족, 뒤의 조건 만족 -> o
+        a=1 b=1 c=1 <- 모두 불만족 -> x
+        */
+        return "aaa";
+    }
+}
+
+
+/*
+실습가이드
+B (deposit_payable, transferTo 함수 보유)
+C1(receive, deposit_payable 함수 보유), C2 (deposit_payable 함수 보유, receive 함수 없음)
+
+1. B 배포하고 5 ether deposit 하기, 잔액 변화 확인
+2. transferTo로 2번 지갑에 1ether 전송해보기, 잔액 변화 확인 
+3. transferTo로 C1, C2 전송 시도
+4. C1은 성공, C2는 실패
 */
+
+contract B {
+    function deposit() public payable {}// payable: 돈받을 준비됐어!(단, 일반거래로는 못 받고 deposit함수를 실행해야만 받을 수 있어 !)
+
+    uint eth = 1 ether; /*지금 상황에서는 지역변수가 더 경제적, 보통의 경우 여러 payable 함수들에 활용되므로 상태변수로 설정*/
+
+    function transferTo(address payable _to, uint amount) public {
+        _to.transfer(amount * eth);
+    }
+}
+
+contract C1 {
+    function deposit() public payable {}
+    receive() external payable{}    // CA에게 돈을 받을 수 있는 방법을 가르쳐 줌
+}
+
+contract C2 {
+    function deposit() public payable {}
+}
