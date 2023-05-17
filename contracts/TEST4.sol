@@ -47,25 +47,70 @@ A : 4점, B : 3점 , D : 2점 , F : 1점 부여 후
 */
 
 contract RoomGame {
+    // 게임
+    uint count;
+    address[] array;
+
+    function goRoomGame() public payable {
+        // 참가할 때 참가비용 0.01ETH를 내야합니다. -> 10000000000000000 Wei
+        inGameFee();
+
+        // 4명까지만 들어올 수 있는 방이 있습니다.
+        // require(array[0] != userId[msg.sender] && array[1] != userId[msg.sender]);       // 중복유저 방지
+        array.push(msg.sender);
+        count++;
+
+        // 선착순 4명에게는 각각 4,3,2,1점의 점수를 부여하고 4명이 되는 순간 방이 비워져야 합니다.
+        if(count == 4) {
+            users[userId[array[0]]].score += 4;
+            users[userId[array[1]]].score += 3;
+            users[userId[array[2]]].score += 2;
+            users[userId[array[3]]].score += 1;
+            for(uint i = 0; i<count; i++) {
+                array.pop;      // 동작안함
+            }
+            count = 0;
+        }
+    }
+
+    function getArray() public view returns(address[] memory) {
+        return array;
+    }
+
+    function getCount() public view returns(uint) {
+        return count;
+    }
+
+    function getScore() public view returns(uint) {
+        return users[userId[msg.sender]].score;     // 가스비 초과로 오류남 -> 유저 등록 기능 두 줄 순서 바꾸기...........
+    }
+
+    function getUserId() public view returns(uint) {
+        return userId[msg.sender];
+    }
+    
+
+    // 동작들
     struct user {
         uint number;
         string name;
         uint balance;
         uint score;
+        address a;
     }
 
-    mapping(address => user[]) array;
+    user[] users;
+    mapping(address => uint) userId;
 
     // * 유저 등록 기능 - 유저는 이름만 등록, 번호는 자동적으로 순차 증가, 주소도 자동으로 설정, 점수도 0으로 시작
-    uint count;
-
     function setUser(string memory _name) public {
-        array[msg.sender].push(user(count++, _name, 0, 0));
+        userId[msg.sender] = users.length;      // number과 배열번호가 같음 -> userId[msg.sender]=users[userId[msg.sender]].number
+        users.push(user(users.length, _name, 0, 0, msg.sender));
     }
 
     // * 유저 조회 기능 - 유저의 전체정보 번호, 이름, 주소, 점수를 반환. 
     function getUser() public view returns(user[] memory) {
-        return array[msg.sender];
+        return users;
     }
 
     // * 게임 참가시 참가비 제출 기능 - 참가시 0.01eth 지불 (돈은 smart contract가 보관)
@@ -75,15 +120,15 @@ contract RoomGame {
         if(balances[msg.sender] > 0.01 ether) {
             balances[msg.sender] -= 0.01 ether;
         } else {
-            require(msg.value == 0.01 ether); 
+            require(msg.value == 0.01 ether, "give me 0.01eth !"); 
             payable(this).transfer(0.01 ether);  
         }   
     }
 
     // * 점수를 돈으로 바꾸는 기능 - 10점마다 0.1eth로 환전
     function scoreTransMoney() public payable {
-        require(array[msg.sender][0].score >= 10);      // 번호 어케알아냄?
-        array[msg.sender][0].score -= 10;               // 번호 어케알아냄?
+        require(users[userId[msg.sender]].score >= 10);     
+        users[userId[msg.sender]].score -= 10;               
         address payable wallet = payable(msg.sender);
         wallet.transfer(0.1 ether);
     }
@@ -107,13 +152,38 @@ contract RoomGame {
     }
 
     // * 예치 기능 - 게임할 때마다 참가비를 내지 말고 유저가 일정금액을 미리 예치하고 게임할 때마다 자동으로 차감시키는 기능.
-    uint balance;
     mapping(address => uint) balances;
 
     function FastPay() public payable {
         payable(this).transfer(msg.value);
-        balance = msg.value;
-        balances[msg.sender] += balance;
+        balances[msg.sender] += msg.value;
     }
 
+}
+
+
+contract Answer {
+    struct User {
+        uint number;
+        string name;
+        address account;
+        uint balance;
+        uint score;
+    }
+
+    mapping(address => User) userList;
+    uint count;
+
+    // * 유저 등록 기능 - 유저는 이름만 등록, 번호는 자동적으로 순차 증가, 주소도 자동으로 설정, 점수도 0으로 시작
+    function register(string memory _name) public {
+        userList[msg.sender] = User(count++, _name, msg.sender, msg.sender.balance, 0);
+    }
+
+    // * 유저 조회 기능 - 유저의 전체정보 번호, 이름, 주소, 점수를 반환. 
+    function search(address _a) public view returns(User memory) {
+        return userList[_a];
+    }
+
+    // * 게임 참가시 참가비 제출 기능 - 참가시 0.01eth 지불 (돈은 smart contract가 보관)
+    // * 점수를 돈으로 바꾸는 기능 - 10점마다 0.1eth로 환전
 }
