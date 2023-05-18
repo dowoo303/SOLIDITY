@@ -155,7 +155,7 @@ contract MODIFIER {
 
     modifier lessThanFive() {
         require(a<5, "should be less than five");
-        _;  // 함수가 실행되는 시점
+        _;  // 원함수가 실행되는 시점
         _;
         _;
         _;
