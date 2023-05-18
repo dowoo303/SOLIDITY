@@ -162,7 +162,7 @@ contract RoomGame {
 }
 
 
-contract Answer {
+contract Answer1 {
     struct User {
         uint number;
         string name;
@@ -174,6 +174,7 @@ contract Answer {
     mapping(address => User) userList;
     uint count;
     User[] public top4;     // 일단 Dynamic(동적) 배열로 선언
+    User[4] public top4_2;
 
 
     address payable owner;
@@ -194,13 +195,14 @@ contract Answer {
     }
 
     // * 게임 참가시 참가비 제출 기능 - 참가시 0.01eth 지불 (돈은 smart contract가 보관)
+    // 동적배열
     function gameIn() public payable {
         require((userList[msg.sender].balance >= 10**16 && msg.value==0) || msg.value == 0.01 ether);
 
         if(msg.value==0) {
             userList[msg.sender].balance -= 10**16;
         }
-        
+
         if(top4.length ==4) {
             for(uint i=4;i>0;i--) {
                 userList[top4[i-1].account].score += 5-i;
@@ -209,6 +211,56 @@ contract Answer {
         }
         
         top4.push(userList[msg.sender]);
+    }
+
+
+    // 고정(fixed)배열
+    function gameIn2() public payable {
+        require((userList[msg.sender].balance >= 10**16 && msg.value==0) || msg.value == 0.01 ether);
+
+        if(msg.value==0) {
+            userList[msg.sender].balance -= 10**16;
+        }
+
+        if(getLengthOfTop4()==4) {
+            for(uint i=4;i>0;i--) {
+                userList[top4[i-1].account].score += 5-i;
+            }
+            delete top4_2;
+        }
+        top4_2[getLengthOfTop4()] = userList[msg.sender];
+        
+    }
+
+    /*
+		위의 gameIn2()를 modifier를 사용해본 버전
+		modifier isitFour {
+        if(getLengthOfTop4()==4) {
+            delete top4_2;
+            _;
+        }
+        _;
+    }
+
+    function gameIn2_2() public payable isitFour {
+        require((userList[msg.sender].balance >= 10**16 && msg.value==0) || msg.value == 0.01 ether);
+
+        if(msg.value==0) {
+            userList[msg.sender].balance -= 10**16;
+        }
+
+        top4_2[getLengthOfTop4()] = userList[msg.sender];
+        
+    }*/
+
+    function getLengthOfTop4() public view returns(uint) {
+        // 고정배열의 초기값이 0인 것을 이용한다
+        for(uint i=0; i<4; i++) {
+            if(top4_2[i].account == address(0)) {
+                return i;
+            }
+        }
+        return 4;
     }
 
     // * 점수를 돈으로 바꾸는 기능 - 10점마다 0.1eth로 환전
@@ -247,6 +299,50 @@ contract Answer {
     }
 }
 
+contract FixedDynamic {
+    uint[] public a;
+    uint[4] public b;
+    uint count;
+
+    // 동적 배열과 고정 배열의 차이점
+    function getAB() public view returns(uint[] memory, uint[4] memory) {
+        return (a,b);
+    }
+
+    function pushA(uint _n) public {
+        a.push(_n);
+    }
+
+    // 배열 자리를 입력하고 들어가는게 싫음
+    function pushB(uint _a, uint _b) public {
+        b[_a-1] = _b;
+    }
+
+    // 상태변수 써서 싫음(가스비)
+    function pushB2(uint _a) public {
+        b[count++] = _a;
+    }
+
+    // 자리도 자동으로 앞부터 들어가고, 가스비도 아낄 수 있는 방법
+    function pushB3(uint _a) public {
+        require(_a !=0);
+        if(getLengthB()==4) {
+            delete b;           // 자리가 다 차면 비우기
+        }
+        b[getLengthB()] = _a;   // 함수를 집어넣음
+    }
+
+    function getLengthB() public view returns(uint) {
+        for(uint i=0; i<4; i++) {
+            if(b[i]==0) {
+                return i;
+            }
+        }
+        return 4;
+    }
+
+
+}
 
 contract POPvsDELETE {
     
