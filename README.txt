@@ -61,10 +61,24 @@ REMIX DEFAULT WORKSPACE
 
 
 05-17
+1. TEST3 풀이
+    1) 일반판
+    2) 확장판 - 컨트랙트 2개로 분리하여 서로 소통
+2. TEST5
+3. TEST4 풀이 약간
 
 
 05-18
-
+1. TEST4 리뷰
+	1) 문제 리뷰
+    2) FixedDynamic 정적 동적 비교
+    3) Pop과 Delete 가스비 비교
+2. TEST5 리뷰
+	1) 문제 리뷰
+    2) While
+    3) 배열뒤집기(ReversArray)
+    4) Bytes 길이측정 및 string으로 변환법
+3. TEST6
 
 
 

@@ -213,6 +213,7 @@ contract fixedArray {
 
     function pushB2(uint _n) public {
         b[count++] = _n;
+        count++;
     }
 
 }

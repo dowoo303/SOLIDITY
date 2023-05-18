@@ -79,9 +79,9 @@ contract Answer {
 // 조건문을 설정하기 애매할 때 while을 사용 -> 특정조건을 만족할 때까지 반복해야할 경우
 contract While {
     function while1(uint _n) public pure {
-        uint a;
-        while(_n < a) {
-            a++;
+        uint ab;
+        while(_n < ab) {
+            ab++;
         }
     }
 
@@ -90,6 +90,7 @@ contract While {
         while(a.length <_n) {
             a.push(a.length+1);
         }
+        return a;
     }
 
     function while_3(uint _n) public pure returns(uint) {
@@ -149,7 +150,7 @@ contract Bytes_Length {
         return _a;
     }
 
-    // bytes배열을 각 bytes1으로 나눠보기
+    // bytes배열을 쪼개서 각 bytes1의 배열로 나누기
     function bytestoBytesArray(bytes memory _bytes) public pure returns(bytes1[] memory) {
         bytes1[] memory _bytes1 = new bytes1[](_bytes.length);
         for(uint i=0; i<_bytes1.length; i++) {
