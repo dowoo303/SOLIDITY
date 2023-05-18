@@ -173,6 +173,15 @@ contract Answer {
 
     mapping(address => User) userList;
     uint count;
+    User[] public top4;     // 일단 Dynamic(동적) 배열로 선언
+
+
+    address payable owner;
+
+    constructor() payable  {
+        // 0번 지갑 주소 : 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+        owner = payable(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4);
+    }
 
     // * 유저 등록 기능 - 유저는 이름만 등록, 번호는 자동적으로 순차 증가, 주소도 자동으로 설정, 점수도 0으로 시작
     function register(string memory _name) public {
@@ -185,5 +194,99 @@ contract Answer {
     }
 
     // * 게임 참가시 참가비 제출 기능 - 참가시 0.01eth 지불 (돈은 smart contract가 보관)
+    function gameIn() public payable {
+        require((userList[msg.sender].balance >= 10**16 && msg.value==0) || msg.value == 0.01 ether);
+
+        if(msg.value==0) {
+            userList[msg.sender].balance -= 10**16;
+        }
+        
+        if(top4.length ==4) {
+            for(uint i=4;i>0;i--) {
+                userList[top4[i-1].account].score += 5-i;
+            }
+            delete top4;
+        }
+        
+        top4.push(userList[msg.sender]);
+    }
+
     // * 점수를 돈으로 바꾸는 기능 - 10점마다 0.1eth로 환전
+    function withdraw(uint _n) public {
+        // 10점 단위로 넣는다고 가정
+        require(_n%10==0 && userList[msg.sender].score >= _n);
+        userList[msg.sender].score -= _n;
+        payable(msg.sender).transfer(_n%10*0.1 ether);
+    }
+
+    // * 점수를 돈으로 바꾸는 기능 - 10점마다 0.1eth로 환전 (최대 금액 자동 환전)
+    function withdraw_All() public {
+        require(userList[msg.sender].score >= 10);
+        uint a = userList[msg.sender].score /10;
+        userList[msg.sender].score = userList[msg.sender].score%10;
+        payable(msg.sender).transfer(a*0.1 ether);
+    }
+
+    // * 관리자 인출 기능 - 관리자는 0번지갑으로 배포와 동시에 설정해주세요, 관리자는 원할 때 전액 혹은 일부 금액을 인출할 수 있음 (따로 구현)
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function ownerWithdraw(uint _n) public onlyOwner {
+        owner.transfer(_n*1 ether);
+    }
+
+    function ownerWithdrawAll() public onlyOwner {
+        owner.transfer(address(this).balance);
+    }
+
+    // * 예치 기능 - 게임할 때마다 참가비를 내지 말고 유저가 일정금액을 미리 예치하고 게임할 때마다 자동으로 차감시키는 기능.
+    function deposit() public payable {
+        userList[msg.sender].balance += msg.value;
+    }
+}
+
+
+contract POPvsDELETE {
+    
+    // gas-실제요금과 관련, execuiton cost-실질 사용 요금은 아님(컴퓨팅 비용)
+
+    uint[] public a;
+    uint[4] b;
+
+    function pushA(uint _n) public {
+        a.push(_n);
+    }
+
+    function returnA() public view returns(uint[] memory) {
+        return a;
+    }
+
+    function popA() public {
+        a.pop(); // gas - 41551, 26531, 10267 / 41551, 26531, 10267 / 41551, 26531, 10267 / 47071, 25065, 10267
+    }
+
+    /*
+    pop과 delete 비교
+    array를 초기화 시키기 위해서 delete는 한번만 수행, pop은 여러번 수행해야하는 차이가 있음.
+    pop은 같은 양의 cost를 요구하지만 맨 마지막 번에는 추가적인 gas를 요구함
+
+    delete는 단일 수행이므로 요구하는 gas가 높으나, 총액으로 환산하면 더 경제적임.
+    */
+
+    function deleteA() public {
+        delete a; // gas - 81202, 37288, 25546 (4),   149266, 61597, 55932(10)
+    }
+
+    /*
+    delete와 renew 비교
+    delete와 renew 둘다 내부 요소의 개수가 많아질수록 cost가 증가한다.
+    4개의 경우 그리고 10개의 경우 모두 delete가 gas, transaction, execution cost 모두 낮다.
+    uint[]의 경우에는 delete가 renew 보다 (현재 상황에서는) 효과적으로 보임
+    */
+
+    function renewA() public {
+        a = new uint[](0);
+    }   // 81358, 37397, 25682 (4),    149372, 61671, 56024(10)
 }
