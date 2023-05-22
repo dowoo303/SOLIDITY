@@ -82,5 +82,14 @@ REMIX DEFAULT WORKSPACE
 
 
 
+05-22
+1. TEST6
+	1) TEST6 리뷰(users array선언, mapping선언)
+    2) Initalization
+    3) 이중매핑
+    4) 블록 시간
+2. TEST7(시,분,초)
+
+
 
 
