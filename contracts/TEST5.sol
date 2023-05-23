@@ -174,3 +174,5 @@ contract Bytes_Length {
     }
     // 위 abi.encodePacked(a)를 이용하면 1bytes들을 입력받아서 하나의 단어 묶음으로 낼 수도 있다
 }
+
+

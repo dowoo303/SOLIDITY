@@ -129,10 +129,105 @@ contract TEST6 {
 
 
 
+contract mappingAnswer {
+    struct poll {
+        uint number;
+        string title;
+        string context;
+        address by;
+        uint time;
+        uint pros;
+        uint cons;
+        pollStatus status;
+    }
+
+    // poll을 관리할 자료구조 , array or mapping
+    mapping(string => poll) public polls;     // * 전체 안건 확인 기능 - 제목으로 안건을 검색하면 번호, 제목, 내용, 제안자, 찬반 수 모두를 반환하는 기능
+    uint public count; // 안건 수
+    uint public userCount; // user 수
+
+    enum votingStatus {
+        notVoted,
+        pro,
+        con
+    }
+
+    enum pollStatus {
+        ongoing,
+        passed,
+        rejected
+    }
+
+    struct user {
+        string name;
+        address addr;
+        string[] suggested;
+        mapping(string=>votingStatus) voted;
+    }
+
+    // user를 관리할 자료구조 mapping
+    mapping(address=>user) users;
+
+
+    // 유저체크 모디파이어
+    modifier isItUser() {
+        require(users[msg.sender].addr == msg.sender);
+        _;
+    }
+
+
+    // * 사용자 등록 기능 - 사용자를 등록하는 기능
+    function pushUser(string calldata _name) public {
+        (users[msg.sender].name, users[msg.sender].addr) = (_name, msg.sender);
+        userCount++;
+    }
+
+    // * 투표하는 기능 - 특정 안건에 대하여 투표하는 기능, 안건은 제목으로 검색, 이미 투표한 건에 대해서는 재투표 불가능
+    function vote(string calldata _title, bool _vote) external/*상속받은 애도 못하게*/ isItUser {
+        require(users[msg.sender].voted[_title]==votingStatus.notVoted && polls[_title].status == pollStatus.ongoing); //투표자가 해당 안건에 대해서 투표를 안했어야 함
+        // 찬성이냐, 반대이냐
+        if(_vote==true) {
+            polls[_title].pros++;
+            users[msg.sender].voted[_title] = votingStatus.pro;
+        } else {
+            polls[_title].cons++;
+            users[msg.sender].voted[_title] = votingStatus.con;
+        }
+    }
+
+    // * 제안한 안건 확인 기능 - 자신이 제안한 안건에 대한 현재 진행 상황 확인기능 - (번호, 제목, 내용, 찬반 반환 // 밑의 심화 문제 풀었다면 상태도 반환)
+    function searchSuggested(string calldata _title) public view returns(poll memory) {
+        require(msg.sender==polls[_title].by, "You did not suggested it.");
+        return polls[_title];
+    }
+
+    // * 안건 제안 기능 - 자신이 원하는 안건을 제안하는 기능
+    function suggest(string calldata _title, string calldata _context) public {
+        polls[_title] = poll(++count, _title, _context, msg.sender, block.timestamp, 0,0, pollStatus.ongoing);
+    }
+
+    // * 전체 안건 확인 기능 - 제목으로 안건을 검색하면 번호, 제목, 내용, 제안자, 찬반 수 모두를 반환하는 기능
+    function getPoll(string memory _title) public view returns(poll memory) {
+        return polls[_title];
+    }
+
+    // * 안건 진행 과정 - 투표 진행중, 통과, 기각 상태를 구별하여 알려주고 전체의 70% 그리고 투표자의 66% 이상이 찬성해야 통과로 변경, 둘 중 하나라도 만족못하면 기각
+    function checkStatus(string memory _title) external isItUser {
+        require(block.timestamp > polls[_title].time+100);
+        if((polls[_title].pros + polls[_title].cons) > userCount*7/10 && (polls[_title].pros) / (polls[_title].pros + polls[_title].cons) *100 > 66 ) {
+            polls[_title].status = pollStatus.passed;
+        } else {
+            polls[_title].status = pollStatus.rejected;
+        }
+    }
+}
 
 
 
-contract Q6 {
+
+
+
+contract arrayAnswer {
     struct poll {
         uint number;
         string title;
@@ -210,11 +305,11 @@ contract Q6 {
 }
 
 
-contract User {
-    Q6 polls;
+contract arrayAnswerUser {
+    arrayAnswer polls;
 
     constructor(address _a) {
-        polls = Q6(_a);
+        polls = arrayAnswer(_a);
     }
 
     enum votingStatus {
@@ -387,6 +482,7 @@ contract doubleMapping {
 
 contract TIME {
     // 유닉스 타임 출력
+    // 배포 시간에 고정
     uint public currentTime = block.timestamp;
 
     // 글로벌 베리어블(변수)을 보고 오기때문에 view
