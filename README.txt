@@ -81,7 +81,6 @@ REMIX DEFAULT WORKSPACE
 3. TEST6
 
 
-
 05-22
 1. TEST6
 	1) TEST6 리뷰(users array선언, mapping선언)
@@ -91,5 +90,27 @@ REMIX DEFAULT WORKSPACE
 2. TEST7(시,분,초)
 
 
+05-23
+1. TEST6 리뷰
+    1) 시간기능 추가하기
+2. TEST7
+    1) TEST7에서 '시 분 초'를 합쳐서 output 출력해보기
+3. Import
+    1) 로컬 내 import
+    2) 라이브러리 import(230523_3.sol)
+4. TEST8
 
 
+05-25
+1. TEST9
+    1) 은행 앱 만들어보기
+    2) msg sender 이해
+2. ERC20 학습
+
+
+05-26
+1. ERC20
+	1) MintToken 실험
+    2) 사기유형파악
+2. ERC721(NFT)
+3. 연사 초청강연

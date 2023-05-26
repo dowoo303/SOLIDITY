@@ -78,3 +78,8 @@ contract TRASH is ERC20("Trash", "1") {
         }
     }
 }
+
+
+
+
+
