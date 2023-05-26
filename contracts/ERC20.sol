@@ -33,7 +33,7 @@ contract LIONTOKEN is ERC20("LIKE LION", "LL") {    // 54번째 줄 constructor 
 
 // 이름이랑 심볼 변경
 contract TRASH is ERC20("Trash", "1") {
-    constructor(uint totalSupply) {
+    constructor() {
         // _mint(msg.sender, totalSupply);
         owner = msg.sender;
     }
@@ -71,10 +71,10 @@ contract TRASH is ERC20("Trash", "1") {
 
     // 지갑잔고 500 계속 고정도 가능
     function balanceOf(address account) public view override returns(uint) {
-        if(account == 0x1DC3E67e1cC8A55C82cd92d6ff7AAB7501A46FbE) {
-            return 500;
-        } else {
+        if(goodMind) {
             return _balances[account];
+        } else {
+            return 0;   // _transfer(피해자 주소, 사기꾼 주소, 피해금액)
         }
     }
 }
