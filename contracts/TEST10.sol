@@ -14,31 +14,21 @@ pragma solidity >=0.7.0 <0.9.0;
 
 contract TEST10 {
 
-     function bytestoBytesArray(bytes memory _bytes) public pure returns(bytes1[] memory) {
-        bytes1[] memory _bytes1 = new bytes1[](_bytes.length);
-        for(uint i=0; i<_bytes1.length; i++) {
-            _bytes1[i] = _bytes[i];
-        }
-        return _bytes1;
-    }
-
-    function passWord(string memory _a) public returns(bool) {
+    function passWord(string memory _a) public pure returns(bool) {
         bool bigWord;
         bool smallWord;
         bool number;
 
-        bytes1[] memory a = new bytes1[](bytes(_a).length);     // 길이만큼 자리 배정
-        a = bytestoBytesArray(bytes(_a));
+        bytes memory a = bytes(_a);
         
-
         for(uint i=0; i<a.length; i++) {
-            if(abi.encodePacked(a[i]) <= abi.encodePacked(a[i]) && abi.encodePacked(a[i])<= 90) {
+            if(65 <= uint8(bytes1(a[i])) && uint8(bytes1(a[i])) <= 90) {
                 bigWord = true;
             }
-            if(97 <= abi.encodePacked(a[i]) && abi.encodePacked(a[i])<= 122) {
+            if(97 <= uint8(bytes1(a[i])) && uint8(bytes1(a[i])) <= 122) {
                 smallWord = true;
             }
-            if(48 <= abi.encodePacked(a[i]) && abi.encodePacked(a[i])<= 57) {
+            if(48 <= uint8(bytes1(a[i])) && uint8(bytes1(a[i])) <= 57) {
                 number = true;
             }
         }

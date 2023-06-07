@@ -21,3 +21,6 @@ contract Mint1_1 is ERC721Enumerable {
         return string(abi.encodePacked(URI, '/', Strings.toString(_tokenID), '.json'));     // 공통적인 부분 /, 숫자, .json 붙여주기
     }
 }
+
+
+// json: https://gateway.pinata.cloud/ipfs/QmdJqN3uRXqJHJSEcoBh9HQLsZNY83HFB4MN6nmgz5F6Am
