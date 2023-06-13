@@ -122,3 +122,10 @@ REMIX DEFAULT WORKSPACE
     2) 상속받을 시에 생성자를 받는 두가지 방법
 2. Truffle & Ganache 설치
 
+
+06-12
+1. event_emit
+
+
+06-13
+1. doubleArray
